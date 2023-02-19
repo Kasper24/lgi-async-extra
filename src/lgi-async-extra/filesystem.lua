@@ -4,6 +4,7 @@
 -- @module filesystem
 -- @license GPL v3.0
 ---------------------------------------------------------------------------
+---
 local lgi = require("lgi")
 local GLib = lgi.GLib
 local Gio = lgi.Gio
@@ -12,6 +13,7 @@ local File = require("external.filesystem.src.lgi-async-extra.file")
 local async = require("external.async")
 local debug = debug
 local os = os
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local capi = {
     awesome = awesome
 }
@@ -103,7 +105,7 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
             end)
         end,
         iterate = {"enumerator", function(results, cb)
-            local enumerator = table.unpack(results.enumerator)
+            local enumerator = unpack(results.enumerator)
 
             -- `next_files_async` reports errors in a two-step system. In the event of an error,
             -- the ongoing call will still succeed and report all files that had been queried
@@ -153,7 +155,7 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
             end)
         end}
     }, function(err, results)
-        local enumerator = table.unpack(results.enumerator)
+        local enumerator = unpack(results.enumerator)
 
         enumerator:close_async(priority, nil, function(_, token)
             local _, err_inner = enumerator:close_finish(token)
@@ -199,7 +201,7 @@ function filesystem.list_contents(dir, attributes, cb)
             end)
         end,
         list = {"enumerator", function(results, cb)
-            local enumerator = table.unpack(results.enumerator)
+            local enumerator = unpack(results.enumerator)
             local list = {}
 
             -- `next_files_async` reports errors in a two-step system. In the event of an error,
@@ -229,8 +231,8 @@ function filesystem.list_contents(dir, attributes, cb)
             end)
         end}
     }, function(err, results)
-        local enumerator = table.unpack(results.enumerator)
-        local list = results.list and table.unpack(results.list)
+        local enumerator = unpack(results.enumerator)
+        local list = results.list and unpack(results.list)
 
         enumerator:close_async(priority, nil, function(_, token)
             local _, err_inner = enumerator:close_finish(token)
@@ -270,7 +272,7 @@ function filesystem.remove_directory(dir, cb)
             end)
         end,
         iterate = {"enumerator", function(results, cb)
-            local enumerator = table.unpack(results.enumerator)
+            local enumerator = unpack(results.enumerator)
 
             local function iterate(cb_iterate)
                 enumerator:next_files_async(BUFFER_SIZE, priority, nil, function(_, token)
@@ -310,7 +312,7 @@ function filesystem.remove_directory(dir, cb)
             end)
         end}
     }, function(err, results)
-        local enumerator = table.unpack(results.enumerator)
+        local enumerator = unpack(results.enumerator)
 
         enumerator:close_async(priority, nil, function(_, token)
             local _, err_inner = enumerator:close_finish(token)

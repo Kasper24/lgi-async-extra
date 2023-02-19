@@ -36,6 +36,7 @@ local Gio = lgi.Gio
 local GLib = lgi.GLib
 local GFile = Gio.File
 local awful = require("awful")
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local stream_utils = require("external.filesystem.src.lgi-async-extra.stream")
 
@@ -164,7 +165,7 @@ local function clean_up_stream(result_index, stream_index, cb)
     return function(err, results)
         local result
         if result_index and results[result_index] then
-            result = table.unpack(results[result_index])
+            result = unpack(results[result_index])
         end
 
         if not results[stream_index] then
@@ -172,7 +173,7 @@ local function clean_up_stream(result_index, stream_index, cb)
         end
 
         -- Make sure to always close the stream, even if the read operation failed.
-        local stream = table.unpack(results[stream_index])
+        local stream = unpack(results[stream_index])
         stream:close_async(GLib.PRIORITY_DEFAULT, nil, function(_, token)
             local _, err_inner = stream:close_finish(token)
             -- Prioritize the outer error (from the read operation), as the inner error (closing the stream) may be
@@ -295,7 +296,7 @@ function File:write(data, mode, cb)
                 self:write_stream(mode, cb_inner)
             end,
             write = {"stream", function(results, cb_inner)
-                local stream = table.unpack(results.stream)
+                local stream = unpack(results.stream)
 
                 stream:write_all_async(data, priority, nil, function(_, token)
                     local _, _, err = stream:write_all_finish(token)
@@ -367,7 +368,7 @@ function File:read_bytes(size, cb)
             self:read_stream(cb_inner)
         end,
         bytes = {"stream", function(results, cb_inner)
-            local stream = table.unpack(results.stream)
+            local stream = unpack(results.stream)
 
             stream:read_bytes_async(size, priority, nil, function(_, token)
                 local bytes, err = stream:read_bytes_finish(token)
@@ -397,7 +398,7 @@ function File:read_string(cb)
             self:read_stream(cb_inner)
         end,
         string = {"stream", function(results, cb_inner)
-            local stream = table.unpack(results.stream)
+            local stream = unpack(results.stream)
             stream_utils.read_string(stream, cb_inner)
         end}
     }, clean_up_stream("string", cb))
@@ -435,7 +436,7 @@ function File:read_line(cb)
             self:read_stream(cb_inner)
         end,
         line = {"stream", function(results, cb_inner)
-            local stream = table.unpack(results.stream)
+            local stream = unpack(results.stream)
             stream = Gio.DataInputStream.new(stream)
 
             stream:read_line_async(priority, nil, function(_, token)
@@ -472,7 +473,7 @@ function File:iterate_lines(iteratee, cb)
             self:read_stream(cb_inner)
         end,
         lines = {"stream", function(results, cb_inner)
-            local stream = table.unpack(results.stream)
+            local stream = unpack(results.stream)
             stream = Gio.DataInputStream.new(stream)
 
             local function read_line(cb_line)
@@ -546,8 +547,8 @@ local function _file_copy_impl(self, dest, options, cb)
             self:read_stream(cb)
         end},
         splice = {"out_stream", "in_stream", function(results, cb)
-            local in_stream = table.unpack(results.in_stream)
-            local out_stream = table.unpack(results.out_stream)
+            local in_stream = unpack(results.in_stream)
+            local out_stream = unpack(results.out_stream)
             local flags = {Gio.OutputStreamSpliceFlags.CLOSE_SOURCE, Gio.OutputStreamSpliceFlags.CLOSE_TARGET}
 
             out_stream:splice_async(in_stream, flags, GLib.PRIORITY_DEFAULT, nil, function(_, token)
@@ -589,7 +590,7 @@ function File:copy(dest_path, options, cb)
             self:type(cb)
         end,
         copy = {"file_type", function(results, cb)
-            local file_type = table.unpack(results.file_type)
+            local file_type = unpack(results.file_type)
 
             if file_type ~= Gio.FileType.DIRECTORY then
                 return _file_copy_impl(self, dest, options, cb)
