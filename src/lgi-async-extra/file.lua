@@ -627,6 +627,10 @@ end
 -- @tparam function cb
 -- @treturn[opt] GLib.Error
 function File:delete(cb)
+    if cb == nil then
+        cb = function() end
+    end
+
     local f = self._private.f
     local priority = GLib.PRIORITY_DEFAULT
 
