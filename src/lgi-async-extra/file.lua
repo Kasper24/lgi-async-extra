@@ -332,16 +332,18 @@ function File:write_root(text, callback, is_retry)
                 file:write_all_async(text, GLib.PRIORITY_DEFAULT, nil, function(_, write_result)
                     local length_written = file:write_all_finish(write_result)
                     -- file written
-                    file:truncate(length_written, nil)
-                    file:close_async(GLib.PRIORITY_DEFAULT, nil, function(_, file_close_result)
-                        -- output stream closed
-                        io_stream:close_async(GLib.PRIORITY_DEFAULT, nil, function(_, stream_close_result)
-                            -- file stream closed
-                            if callback then
-                                callback(true)
-                            end
+                    if type(length_written) == "number" then
+                        file:truncate(length_written, nil)
+                        file:close_async(GLib.PRIORITY_DEFAULT, nil, function(_, file_close_result)
+                            -- output stream closed
+                            io_stream:close_async(GLib.PRIORITY_DEFAULT, nil, function(_, stream_close_result)
+                                -- file stream closed
+                                if callback then
+                                    callback(true)
+                                end
+                            end, nil)
                         end, nil)
-                    end, nil)
+                    end
                 end, nil)
             end, nil)
         end
