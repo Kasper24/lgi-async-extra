@@ -339,7 +339,6 @@ local function download(file, uri, callback)
     end)
 end
 
-
 function filesystem.remote_watch(path, uri, interval, callback, old_content_callback)
     local file = File.new_for_path(path)
 
@@ -381,6 +380,10 @@ function filesystem.remote_watch(path, uri, interval, callback, old_content_call
     timer:emit_signal("timeout")
 end
 
+function filesystem.get_xdg_config_dir(sub_folder)
+    return (os.getenv("HOME") .. "/.config/") .. sub_folder .. "/"
+end
+
 function filesystem.get_xdg_cache_home(sub_folder)
     return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/" .. sub_folder .. "/"
 end
@@ -392,6 +395,7 @@ end
 function filesystem.get_awesome_config_dir(sub_folder)
     return (capi.awesome.conffile:match(".*/") or "./") .. sub_folder .. "/"
 end
+
 function filesystem.get_script_path(sub_folder)
     return debug.getinfo(1).source:match("@?(.*/)") .. sub_folder
 end
