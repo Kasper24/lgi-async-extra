@@ -91,7 +91,7 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
     local attributes = options.attributes or "standard::type"
 
     local priority = GLib.PRIORITY_DEFAULT
-    local BUFFER_SIZE = 50
+    local BUFFER_SIZE = 99999
     local f = file_arg(dir)
 
     local outer_cb = cb or function()
