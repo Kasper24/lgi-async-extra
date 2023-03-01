@@ -381,19 +381,35 @@ function filesystem.remote_watch(path, uri, interval, callback, old_content_call
 end
 
 function filesystem.get_xdg_config_dir(sub_folder)
-    return (os.getenv("HOME") .. "/.config/") .. sub_folder .. "/"
+    if sub_folder then
+        return (os.getenv("HOME") .. "/.config/") .. sub_folder .. "/"
+    else
+        return (os.getenv("HOME") .. "/.config/")
+    end
 end
 
 function filesystem.get_xdg_cache_home(sub_folder)
-    return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/" .. sub_folder .. "/"
+    if sub_folder then
+        return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/" .. sub_folder .. "/"
+    else
+        return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache/")
+    end
 end
 
 function filesystem.get_cache_dir(sub_folder)
-    return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/awesome/" .. sub_folder .. "/"
+    if sub_folder then
+        return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/awesome/" .. sub_folder .. "/"
+    else
+        return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/awesome/"
+    end
 end
 
 function filesystem.get_awesome_config_dir(sub_folder)
-    return (capi.awesome.conffile:match(".*/") or "./") .. sub_folder .. "/"
+    if sub_folder then
+        return (capi.awesome.conffile:match(".*/") or "./") .. sub_folder .. "/"
+    else
+        return (capi.awesome.conffile:match(".*/") or "./") "/"
+    end
 end
 
 function filesystem.get_script_path(sub_folder)
