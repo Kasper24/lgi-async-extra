@@ -132,7 +132,7 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
 
                             table.insert(tasks, async.callback(f, filesystem.iterate_contents, iteratee, options))
                         else
-                            table.insert(tasks, async.callback(nil, iteratee, info))
+                            table.insert(tasks, async.callback(nil, iteratee, info, f:get_path(), info:get_name()))
                         end
 
                         if index == #infos then
