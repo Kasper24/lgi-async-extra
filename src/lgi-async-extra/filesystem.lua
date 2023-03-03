@@ -406,9 +406,9 @@ end
 
 function filesystem.get_awesome_config_dir(sub_folder)
     if sub_folder then
-        return (capi.awesome.conffile:match(".*/") or "./") .. sub_folder .. "/"
+        return filesystem.get_xdg_config_dir("awesome") .. sub_folder .. "/"
     else
-        return (capi.awesome.conffile:match(".*/") or "./") "/"
+        return filesystem.get_xdg_config_dir("awesome")  .. "/"
     end
 end
 
