@@ -8,9 +8,11 @@
 local lgi = require("lgi")
 local GLib = lgi.GLib
 local Gio = lgi.Gio
+local awful = require("awful")
 local gtimer = require("gears.timer")
 local File = require("external.filesystem.src.lgi-async-extra.file")
 local async = require("external.async")
+local find_last = require("helpers.string").find_last
 local debug = debug
 local os = os
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -245,6 +247,30 @@ function filesystem.list_contents(dir, attributes, cb)
             cb(err or err_inner, list)
         end)
     end)
+end
+
+function filesystem.scan(path, callback)
+    local paths = {}
+
+    if path == nil or path == "" then
+        callback(true, nil)
+        return
+    end
+
+    awful.spawn.with_line_callback(string.format("find %s", path), {
+        stdout = function(path)
+            local last_slash_index = find_last(path, "/")
+            local path_no_name = path:sub(1, last_slash_index)
+            local name = path:sub(last_slash_index + 1, #path)
+            table.insert(paths, {full_path = path, path_no_name = path_no_name, name = name})
+        end,
+        output_done = function()
+            if #paths == 0 then
+                paths = nil
+            end
+            callback(nil, paths)
+        end
+    })
 end
 
 --- Recursively removes a directory and its contents.
