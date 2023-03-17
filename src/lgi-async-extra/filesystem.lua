@@ -56,6 +56,21 @@ function filesystem.make_directory(path, cb)
     end)
 end
 
+function filesystem.make_directory_with_parents(path, cb)
+    if cb == nil then
+        cb = function()
+        end
+    end
+
+    awful.spawn.easy_async("mkdir -p " .. path, function(_, stderr, _, exitcode)
+        if exitcode ~= 0 then
+            cb(stderr)
+        else
+            cb(nil)
+        end
+    end)
+end
+
 --- Iterates the contents of a directory.
 --
 -- The `iteratee` callback is called once for every entry in the given directory, passing a
