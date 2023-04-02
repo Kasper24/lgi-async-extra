@@ -691,7 +691,7 @@ end
 
 function File:query_info_block(attribute)
     local f = self._private.f
-    f:query_info(attribute, 0, nil)
+    return f:query_info(attribute, 0, nil)
 end
 
 --- Check if the file exists.
