@@ -689,6 +689,11 @@ function File:query_info(attribute, cb)
     end)
 end
 
+function File:query_info_block(attribute)
+    local f = self._private.f
+    f:query_info(attribute, 0, nil)
+end
+
 --- Check if the file exists.
 --
 -- Keep in mind that checking for existence before reading or writing a file is
@@ -717,6 +722,15 @@ function File:exists(cb)
             cb(nil, true)
         end
     end)
+end
+
+function File:exists_block()
+    local info = self:query_info_block("standard::type")
+    if info then
+        return true
+    else
+        return false
+    end
 end
 
 --- Query the size of the file.
