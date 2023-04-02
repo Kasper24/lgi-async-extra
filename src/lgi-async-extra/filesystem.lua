@@ -369,13 +369,15 @@ function filesystem.remove_directory(dir, cb)
 end
 
 
-local function download(file, uri, callback)
+local function download(file, uri, callback, old_content)
     local remote_file = File.new_for_uri(uri)
 
     remote_file:read(function(error, content)
         if error == nil then
             file:write(content)
             callback(content)
+        else
+            callback(old_content)
         end
     end)
 end
@@ -402,7 +404,7 @@ function filesystem.remote_watch(path, uri, interval, callback, old_content_call
 
                         if diff >= interval then
                             print("Enough time had passed, redownloading " .. path)
-                            download(file, uri, callback)
+                            download(file, uri, callback, old_content)
                         else
                             callback(old_content)
 
@@ -413,7 +415,7 @@ function filesystem.remote_watch(path, uri, interval, callback, old_content_call
                 end)
             else
                 print(path .. " doesn't exist, downloading " .. uri)
-                download(file, uri, callback)
+                download(file, uri, callback, old_content)
             end
         end)
     end)
