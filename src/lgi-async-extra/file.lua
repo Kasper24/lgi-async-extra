@@ -602,7 +602,7 @@ function File:copy(dest_path, options, cb)
                 return cb(err)
             end
 
-            local filesystem = require("helpers.filesystem.filesystem")
+            local filesystem = require("external.filesystem.filesystem")
             local path = self:get_path()
 
             local function iteratee(info, cb)
