@@ -103,16 +103,11 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
         options = {}
     end
 
-    options = options or {}
-
     local attributes = options.attributes or "standard::type"
 
     local priority = GLib.PRIORITY_DEFAULT
-    local BUFFER_SIZE = 99999
+    local BUFFER_SIZE = 50
     local f = file_arg(dir)
-
-    local outer_cb = cb or function()
-    end
 
     async.dag({
         enumerator = function(_, cb)
@@ -121,8 +116,8 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
                 cb(err, enumerator)
             end)
         end,
-        iterate = {"enumerator", function(results, cb)
-            local enumerator = unpack(results.enumerator)
+        iterate = { "enumerator", function(results, cb)
+            local enumerator = table.unpack(results.enumerator)
 
             -- `next_files_async` reports errors in a two-step system. In the event of an error,
             -- the ongoing call will still succeed and report all files that had been queried
@@ -138,7 +133,7 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
 
                     local tasks = {}
 
-                    for index, info in ipairs(infos) do
+                    for _, info in ipairs(infos) do
                         local path = string.format("%s/%s", f:get_path(), info:get_name())
                         local f = File.new_for_path(path)
 
@@ -149,11 +144,7 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
 
                             table.insert(tasks, async.callback(f, filesystem.iterate_contents, iteratee, options))
                         else
-                            table.insert(tasks, async.callback(nil, iteratee, info, f:get_path(), info:get_name()))
-                        end
-
-                        if index == #infos then
-                            outer_cb()
+                            table.insert(tasks, async.callback(nil, iteratee, info))
                         end
                     end
 
@@ -170,9 +161,9 @@ function filesystem.iterate_contents(dir, iteratee, options, cb)
             async.do_while(iterate, check, function(err)
                 cb(err)
             end)
-        end}
+        end },
     }, function(err, results)
-        local enumerator = unpack(results.enumerator)
+        local enumerator = table.unpack(results.enumerator)
 
         enumerator:close_async(priority, nil, function(_, token)
             local _, err_inner = enumerator:close_finish(token)
@@ -262,30 +253,6 @@ function filesystem.list_contents(dir, attributes, cb)
             cb(err or err_inner, list)
         end)
     end)
-end
-
-function filesystem.scan(path, callback)
-    local paths = {}
-
-    if path == nil or path == "" then
-        callback(true, nil)
-        return
-    end
-
-    awful.spawn.with_line_callback(string.format("find %s", path), {
-        stdout = function(path)
-            local last_slash_index = find_last(path, "/")
-            local path_no_name = path:sub(1, last_slash_index)
-            local name = path:sub(last_slash_index + 1, #path)
-            table.insert(paths, {full_path = path, path_no_name = path_no_name, name = name})
-        end,
-        output_done = function()
-            if #paths == 0 then
-                paths = nil
-            end
-            callback(nil, paths)
-        end
-    })
 end
 
 --- Recursively removes a directory and its contents.
